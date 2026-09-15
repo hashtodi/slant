@@ -1,0 +1,10 @@
+.build/
+*.xcodeproj
+.DS_Store
+Slant.app
+*.dmg
+
+# Reference footage of a competitor's app, used only to measure the fold.
+# Not ours to redistribute.
+MiZfJxANtpQfIHn2.mp4
+*.mov

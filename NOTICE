@@ -1,0 +1,61 @@
+Slant
+Copyright 2026 the Slant authors
+
+This product includes techniques and hardware interface details derived from
+the following Apache-2.0 licensed works. No source files from either project
+were copied verbatim into Slant.
+
+--------------------------------------------------------------------------------
+
+Mac Duo
+Copyright 2026 Makito. Originally developed by Makito.
+https://github.com/sumimakito/Mac-Duo
+Licensed under the Apache License, Version 2.0.
+
+Used for:
+  - the square-to-quad (Heckbert) homography approach to perspective
+  - sampling an MPSImageGaussianPyramid at a continuous mip level so that blur
+    costs no separate pass
+  - placing the overlay window at CGShieldingWindowLevel()
+  - the ScreenCaptureKit "presence window" technique, which keeps a 1x1
+    near-transparent window alive so the application is enumerable in
+    SCShareableContent and can exclude itself from its own capture
+  - documentation of HID feature report 7 (hundredths of a degree)
+  - separate ramp exponents for blur and dimming
+
+--------------------------------------------------------------------------------
+
+LidAngleSensor
+Copyright 2025 Sam Henri Gold
+https://github.com/samhenrigold/LidAngleSensor
+Licensed under the Apache License, Version 2.0.
+
+Used for:
+  - identification of the lid-angle HID device: vendor 0x05AC, product 0x8104,
+    usage page 0x0020 (Sensor), usage 0x008A (Orientation)
+  - the feature report 1 layout (3 bytes, little-endian, whole degrees)
+  - the two-tier hardware probing approach that distinguishes "no sensor" from
+    "sensor present but exposed on the vendor page"
+
+--------------------------------------------------------------------------------
+
+Approaches were also studied in the following MIT licensed projects:
+
+  hinge          https://github.com/noveum/hinge
+                 velocity-dependent spring stiffness; showing the effect
+                 immediately when the display wakes with the lid already
+                 part-closed; frame-rate capping and display-link pausing
+
+  Mac Duo        https://github.com/DhananjayBhosale/MacDuo
+                 (by Dhananjay Bhosale, distinct from Makito's Mac-Duo)
+                 verifying Screen Recording access through a real
+                 SCShareableContent fetch rather than CGPreflightScreenCaptureAccess,
+                 which can retain a stale result; the hysteresis dwell detector
+                 used to learn a resting lid angle; Reduce Motion support
+
+--------------------------------------------------------------------------------
+
+A copy of the Apache License, Version 2.0 is available at
+http://www.apache.org/licenses/LICENSE-2.0
+
+Slant is not affiliated with, endorsed by, or connected to Apple Inc.
