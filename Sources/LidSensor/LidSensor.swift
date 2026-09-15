@@ -38,12 +38,21 @@ public final class LidSensor: @unchecked Sendable {
         IOHIDManagerSetDeviceMatching(manager, matching as CFDictionary)
         IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
 
+        // Every failure past this point has to close the manager. Reconnect
+        // after wake retries up to five times, so a leak here is not a one-off:
+        // it strands an open HID session on each attempt.
+        var opened = false
+        defer {
+            if !opened { IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone)) }
+        }
+
         guard let devices = IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice>,
               let found = devices.first else { return nil }
         device = found
 
         guard IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone)) == kIOReturnSuccess
         else { return nil }
+        opened = true
         self.manager = manager
 
         queue.setSpecific(key: Self.queueKey, value: ())

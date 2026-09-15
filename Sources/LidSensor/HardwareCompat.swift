@@ -24,9 +24,11 @@ public enum HardwareCompat {
         var size = 0
         sysctlbyname("hw.model", nil, &size, nil, 0)
         guard size > 0 else { return "unknown Mac" }
-        var buffer = [CChar](repeating: 0, count: size)
+        var buffer = [UInt8](repeating: 0, count: size)
         sysctlbyname("hw.model", &buffer, &size, nil, 0)
-        return String(cString: buffer)
+        // sysctl reports the length including the trailing NUL; decoding it
+        // would leave one in the string.
+        return String(decoding: buffer.prefix(while: { $0 != 0 }), as: UTF8.self)
     }
 
     /// Two-tier probe.

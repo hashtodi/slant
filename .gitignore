@@ -1,10 +1,55 @@
+# Build output
 .build/
-*.xcodeproj
-.DS_Store
 Slant.app
 *.dmg
+*.xcodeproj
+.swiftpm/
+*.xcuserdatad
+xcuserdata/
+Package.resolved
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Assistant and tooling scratch
+.claude/
+.aider*
+*.log
+
+# Internal working documents. Useful while building, not to anyone using or
+# reading the project — and the spec and plan describe an earlier geometry that
+# was replaced, so publishing them teaches the wrong model. README.md is the
+# documentation.
+docs/HANDOFF.md
+docs/superpowers/
+
+# Secrets — never commit these. Signing and notarisation credentials in
+# particular: an app-specific password in the repo is a password in the world.
+.env
+.env.*
+*.p12
+*.mobileprovision
+*.cer
+notary-*.json
 
 # Reference footage of a competitor's app, used only to measure the fold.
 # Not ours to redistribute.
 MiZfJxANtpQfIHn2.mp4
 *.mov
+*.mp4
+!docs/demo.mp4
+
+# Rendered diagnostics from SLANT_DUMP. Regenerate with:
+#   open -a /Applications/Slant.app --env SLANT_DUMP=1 --env SLANT_DUMP_DIR=/tmp/x
+slant-*.png
+/tmp/

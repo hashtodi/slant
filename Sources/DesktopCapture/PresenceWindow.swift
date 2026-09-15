@@ -8,6 +8,7 @@ import AppKit
 /// the overlay ends up capturing its own output in a feedback loop.
 ///
 /// Technique from sumimakito's Mac-Duo. See NOTICE.
+@MainActor
 public final class PresenceWindow {
 
     private let window: NSWindow

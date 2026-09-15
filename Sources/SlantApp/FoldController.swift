@@ -86,6 +86,10 @@ final class FoldController {
     /// while the menu says "Turn Slant On", and a display link leaked and still
     /// firing. hinge and Mac-Duo both guard this explicitly.
     private var isStarting = false
+    /// Bumped by `stop()`. A `start()` suspended across an await compares the
+    /// generation it began with against this before touching any state, so a
+    /// teardown that happens mid-start cannot be undone when it resumes.
+    private var runGeneration: UInt64 = 0
     private var lifecycle: LifecycleObserver?
     private var statsTimer: Timer?
     private var peakProgress: Double = 0
@@ -97,6 +101,7 @@ final class FoldController {
     func start() async {
         guard !isStarting, sensor == nil else { return }
         isStarting = true
+        let generation = runGeneration
         defer { isStarting = false }
         SlantLog.reset()
         DesktopCapture.logDiagnostics()
@@ -152,7 +157,11 @@ final class FoldController {
             renderer = foldRenderer
         }
 
-        let desktopCapture = DesktopCapture(device: device)
+        // Reuse the capture too, not just the overlay and renderer. It holds
+        // the SCContentFilter, whose rebuild measured ~4.5s — which is the
+        // whole point of suspendForSleep() stopping the capture without
+        // releasing it. Building a new one here threw that away on every wake.
+        let desktopCapture = capture ?? DesktopCapture(device: device)
         desktopCapture.onFrame = { [weak self] texture in
             Task { @MainActor in
                 guard let self else { return }
@@ -198,6 +207,13 @@ final class FoldController {
             onFailure?("Slant could not start screen capture: \(error.localizedDescription)")
             return
         }
+        // stop() may have run while the capture was starting. Without this the
+        // suspended start resumes and quietly rebuilds the sensor, the capture
+        // and the overlay after the user has switched Slant off.
+        guard generation == runGeneration else {
+            desktopCapture.stop()
+            return
+        }
         capture = desktopCapture
 
         startDisplayLink(on: window)
@@ -235,6 +251,7 @@ final class FoldController {
     }
 
     func stop() {
+        runGeneration &+= 1
         demoTimer?.invalidate()
         demoTimer = nil
         statsTimer?.invalidate()
@@ -494,8 +511,11 @@ extension FoldController {
     /// The HID device is briefly absent immediately after wake, so retry rather
     /// than give up on the first failure.
     func reconnect(attemptsRemaining: Int) {
+        let generation = runGeneration
         Task { @MainActor in
             await start()
+            // A stop() anywhere in the retry chain ends it.
+            guard generation == runGeneration else { return }
             guard sensor == nil else { return }
 
             guard attemptsRemaining > 1 else {
@@ -512,6 +532,7 @@ extension FoldController {
                 return
             }
             try? await Task.sleep(nanoseconds: 1_000_000_000)
+            guard generation == runGeneration else { return }
             reconnect(attemptsRemaining: attemptsRemaining - 1)
         }
     }

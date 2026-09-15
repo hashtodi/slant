@@ -5,7 +5,6 @@ import FoldRenderer
 import CoreMedia
 import CoreGraphics
 import Metal
-import CoreGraphics
 import CoreVideo
 
 /// Triggers the system Screen Recording prompt and registers the app in the
